@@ -1,0 +1,17 @@
+version: '3'
+
+tasks:
+
+  no-dirty:
+    desc: "Check that the repository is clean"
+    silent: true
+    cmds: 
+      - {{.CHECK_GIT_OR_DIE}}
+      - |
+          if test -n "$(git status --porcelain)"; then
+            echo "***** git status *****"
+            git status
+            echo "***** git diff *****"
+            git diff
+            {{.ECHO_FAILED}} "ERROR: the repository is dirty"
+          fi

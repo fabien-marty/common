@@ -1,0 +1,32 @@
+[
+  {
+    "aliases": [],
+    "color": "9b2226",
+    "name": "Type: Security"
+  },
+  {
+    "aliases": [],
+    "color": "ee9b00",
+    "name": "Type: Fixed"
+  },
+  {
+    "aliases": [],
+    "color": "bb3e03",
+    "name": "Type: Removed"
+  },
+  {
+    "aliases": [],
+    "color": "e9d8a6",
+    "name": "Type: Changed"
+  },
+  {
+    "aliases": [],
+    "color": "0a9396",
+    "name": "Type: Added"
+  },
+  {
+    "aliases": [],
+    "color": "001219",
+    "name": "Type: Hidden"
+  }
+]

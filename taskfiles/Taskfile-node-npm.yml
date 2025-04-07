@@ -1,0 +1,157 @@
+version: '3'
+
+includes:
+  core: "Taskfile-core.yml"
+
+vars:
+
+  _FNM_DIR: "{{.ROOT_DIR}}/.task/fnm" 
+  _DEFAULT_FNM: "{{._FNM_DIR}}/fnm"
+
+  # Contains, the full absolute path to the "fnm" binary
+  # Can be set by children taskfiles
+  # (if not set, "fnm" will be automatically installed in a temporary directory
+  #  and this variable will be set to this temporary path) 
+  FNM: "{{.FNM|default ._DEFAULT_FNM}}" # 
+
+  _EXTERNAL_FNM:
+    sh: |
+          if [ "{{.FNM}}" = "{{._DEFAULT_FNM}}" ]; then
+            echo "0"
+          else 
+            echo "1"
+          fi
+
+  _DEFAULT_NODE: "{{.FNM}} exec node"
+
+  # Contains, the full absolute path to the "node" binary
+  # Can be set by children taskfiles
+  # (if not set, "node" will be automatically installed in a temporary directory
+  #  and this variable will be set to this temporary path) 
+  NODE: "{{.NODE|default ._DEFAULT_NODE}}"
+
+  _EXTERNAL_NODE:
+    sh: |
+          if [ "{{.NODE}}" = "{{._DEFAULT_NODE}}" ]; then
+            echo "0"
+          else 
+            echo "1"
+          fi
+
+  _DEFAULT_NPM: "{{.FNM}} exec npm"
+
+  # Contains, the full absolute path to the "npm" binary (read-only!)
+  NPM:
+    sh: |
+          if [ "{{._EXTERNAL_NODE}}"  = "0" ]; then
+            echo "{{._DEFAULT_NPM}}"
+          else
+            echo `dirname {{.NODE}}`/npm
+          fi
+
+tasks:
+
+  install-fnm:
+    internal: true
+    silent: true
+    status:
+      - |
+          if [ "{{._EXTERNAL_NODE}}" = "1" ]; then
+            echo "we don't need FNM"
+            exit 0
+          else
+            if [ -x "{{.FNM}}" ]; then
+              echo "FNM already installed"
+              exit 0
+            fi
+          fi
+          exit 1
+    cmds:
+      - "{{.CHECK_CURL_OR_DIE}}"
+      - "{{.ECHO_RUNNING}} '=> Installing fnm...'"
+      - rm -Rf "{{._FNM_DIR}}"
+      - mkdir -p "{{._FNM_DIR}}"
+      - '{{.WRAP}} curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell --install-dir "{{._FNM_DIR}}"'
+      - '{{.FNM}} --version >/dev/null 2>&1 || {{.ECHO_FAILED}} "=> ERROR: fnm not installed"'
+      - "{{.ECHO_OK}} '=> OK: fnm installed'"
+
+  install-node:
+    internal: true
+    silent: true
+    deps: [install-fnm]
+    status:
+      - "{{.NODE}} --version >/dev/null 2>&1"
+    cmds:
+      - "{{.ECHO_RUNNING}} '=> Installing node...'"
+      - "{{.WRAP}} {{.FNM}} install"
+      - "{{.ECHO_OK}} '=> OK: node installed'"
+
+  lock:
+    deps: [install-node]
+    silent: true
+    desc: "(advanced) Lock node/npm dependencies"
+    cmds:
+      - "{{.ECHO_RUNNING}} '=> Locking node dependencies...'"
+      - "{{.WRAP}} {{.NPM}} install --package-lock-only"
+      - "{{.ECHO_OK}} '=> OK: node dependencies locked'"
+    sources:
+      - package.json
+    generates:
+      - package-lock.json
+
+  sync:
+    desc: "(advanced) Sync node/npm dependencies"
+    silent: true
+    deps: [lock]
+    cmds:
+      - "{{.ECHO_RUNNING}} '=> Syncing node dependencies...'"
+      - "{{.WRAP}} {{.NPM}} ci"
+      - cat package-lock.json |md5sum > node_modules/.hash
+      - "{{.ECHO_OK}} '=> OK: node dependencies synced'"
+    sources:
+      - package-lock.json
+    generates:
+      - node_modules/.hash
+
+  debug:
+    desc: "(advanced) Debug the node/npm environment"
+    silent: true
+    deps: [install-node]
+    cmds:
+      - 'echo "FNM_EXTERNAL: {{._EXTERNAL_FNM}}"'
+      - 'echo "NODE_EXTERNAL: {{._EXTERNAL_NODE}}"'
+      - |
+          if [ "{{._EXTERNAL_NODE}}" = "0" ]; then
+            echo "FNM: {{.FNM}}"
+          fi
+      - 'echo "NODE: {{.NODE}}"'
+      - 'echo "NPM: {{.NPM}}"'
+      - |
+          if [ "{{._EXTERNAL_NODE}}" = "0" ]; then
+            echo "FNM_VERSION: `{{.FNM}} --version |sed "s/fnm //"`"
+          fi
+      - 'echo "NODE_VERSION: `{{.NODE}} --version`"'
+      - 'echo "NPM_VERSION: `{{.NPM}} --version`"'
+
+  clean:
+    internal: true
+    silent: true
+    cmds:
+      - rm -Rf node_modules
+
+  mrproper:
+    deps: [clean]
+    internal: true
+    silent: true
+    cmds:
+      - |
+          if [ "{{._EXTERNAL_FNM}}" = "0" ]; then
+            {{.FNM}} env > .fnm.env 2>/dev/null || exit 0
+            source .fnm.env
+            rm -Rf "${FNM_DIR}"
+          fi
+      - |
+          if [ "{{._EXTERNAL_FNM}}" = "0" ]; then
+            rm -Rf {{._FNM_DIR}}
+          fi
+      - rm -f .fnm.env

@@ -1,0 +1,34 @@
+version: '3'
+
+includes:
+  uv: ../taskfiles/Taskfile-python-uv.yml
+  node: ../taskfiles/Taskfile-node-npm.yml
+
+tasks:
+
+  lint:
+    desc: "Lint code and labels"
+    deps: [uv:lint]
+    cmds:
+      - python lint.py --dont-fix
+
+  install:
+    desc: "FIXME"
+    cmds:
+      - task: node:install
+      - task: uv:install
+
+  apply:
+    deps: [node:install]
+    cmds:
+      - "{{.FNM}} exec date"
+
+  clean:
+    cmds:
+      - task: uv:clean
+      - task: node:clean
+
+  mrproper:
+    cmds:
+      - task: uv:mrproper
+      - task: node:mrproper

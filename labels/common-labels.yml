@@ -1,0 +1,32 @@
+name: common-labels
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+env:
+  REPO: ${{ github.repository }}
+  COMMON_REPO: fabien-marty/common
+
+jobs:
+  sync-labels:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Check out ${{ env.COMMON_REPO }} code
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.COMMON_REPO }}
+          path: __common
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install github-label-sync
+        run: |
+          npm install -g github-label-sync
+      - name: Sync labels
+        run: |
+          github-label-sync --access-token "${GITHUB_TOKEN}" --allow-added-labels --labels __common/labels/labels.json "${REPO}"
