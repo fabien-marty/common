@@ -20,7 +20,7 @@ tasks:
       - task: uv:install
 
   apply:
-    deps: [node:install]
+    deps: [node:sync]
     desc: "Apply labels to the current repository"
     cmds:
       - if [ "${REPO:-}" = "" ]; then {{.ECHO_FAIL}} "REPO is not set"; exit 1; fi
