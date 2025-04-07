@@ -1,6 +1,7 @@
 version: '3'
 
 includes:
+  core: ../taskfiles/Taskfile-core.yml
   uv: ../taskfiles/Taskfile-python-uv.yml
   node: ../taskfiles/Taskfile-node-npm.yml
 
@@ -20,8 +21,11 @@ tasks:
 
   apply:
     deps: [node:install]
+    desc: "Apply labels to the current repository"
     cmds:
-      - "{{.FNM}} exec date"
+      - if [ "${REPO:-}" = "" ]; then {{.ECHO_FAIL}} "REPO is not set"; exit 1; fi
+      - if [ "${ACCESS_TOKEN:-}" = "" ]; then {{.ECHO_FAIL}} "ACCESS_TOKEN is not set"; exit 1; fi
+      - "{{.FNM}} exec github-label-sync --access-token ${ACCESS_TOKEN} --allow-added-labels --labels labels.json ${REPO}"
 
   clean:
     cmds:
