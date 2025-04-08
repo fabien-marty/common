@@ -1,8 +1,5 @@
 version: '3'
 
-includes:
-  core: "Taskfile-core.yml"
-
 vars:
 
   ##### COMMON #####
@@ -73,6 +70,12 @@ vars:
 
   _MYPY: "{{.UV}} run mypy"
 
+  _UTILS_DIR: "{{.TASKFILE_DIR}}/utils"
+  _ECHO_OK: "{{._UTILS_DIR}}/echo_ok"
+  _ECHO_RUNNING: "{{._UTILS_DIR}}/echo_running"
+  _ECHO_FAILED: "{{._UTILS_DIR}}/echo_failed"
+  _WRAP: "{{._UTILS_DIR}}/wrap"
+
 
   ##### RUFF #####
 
@@ -135,15 +138,15 @@ tasks:
       WRAP_CAPTURE_OUTPUT: 1
     silent: true
     cmds:
-      - "{{.CHECK_WGET_OR_DIE}}"
-      - '{{.ECHO_RUNNING}} "=> Installing uv..."'
+      - task: check_wget_or_die
+      - '{{._ECHO_RUNNING}} "=> Installing uv..."'
       - mkdir -p "{{._UV_DIR}}"
       - wget -O install.sh https://astral.sh/uv/install.sh
       - chmod +x install.sh
-      - "{{.WRAP}} ./install.sh"
+      - "{{._WRAP}} ./install.sh"
       - rm -f install.sh
-      - '{{.UV}} --version >/dev/null 2>&1 || {{.ECHO_FAILED}} "=> ERROR: uv not installed"'
-      - '{{.ECHO_OK}} "=> OK: uv installed in {{._UV_DIR}}"'
+      - '{{.UV}} --version >/dev/null 2>&1 || {{._ECHO_FAILED}} "=> ERROR: uv not installed"'
+      - '{{._ECHO_OK}} "=> OK: uv installed in {{._UV_DIR}}"'
 
   lock:
     desc: "(advanced) Lock the python/uv environment"
@@ -151,9 +154,9 @@ tasks:
     deps:
       - install
     cmds:
-      - '{{.ECHO_RUNNING}} "=> Locking uv environment..."'
-      - "{{.WRAP}} {{.UV}} lock"
-      - '{{.ECHO_OK}} "=> OK: uv environment locked"'
+      - '{{._ECHO_RUNNING}} "=> Locking uv environment..."'
+      - "{{._WRAP}} {{.UV}} lock"
+      - '{{._ECHO_OK}} "=> OK: uv environment locked"'
     sources:
       - "{{.ROOT_DIR}}/pyproject.toml"
     generates:
@@ -179,11 +182,11 @@ tasks:
     deps: 
       - lock
     cmds:
-      - '{{.ECHO_RUNNING}} "=> Syncing uv environment..."'
-      - "{{.WRAP}} {{.UV}} sync {{.UV_SYNC_OPTS}}"
+      - '{{._ECHO_RUNNING}} "=> Syncing uv environment..."'
+      - "{{._WRAP}} {{.UV}} sync {{.UV_SYNC_OPTS}}"
       - md5sum uv.lock >{{.VENV}}/.uv_lock.md5
       - echo "{{.UV_SYNC_OPTS}}" >{{.VENV}}/.uv_sync_opts
-      - '{{.ECHO_OK}} "=> OK: uv environment synced"'
+      - '{{._ECHO_OK}} "=> OK: uv environment synced"'
 
   lint-ruff:
     deps: ["sync"]
@@ -191,17 +194,17 @@ tasks:
     silent: true
     cmds:
       - |
-          {{.ECHO_RUNNING}} "=> Linting with ruff..."
+          {{._ECHO_RUNNING}} "=> Linting with ruff..."
           if [ "{{.LINT_RUFF}}" = "1" ]; then
             if [ "{{.FIX}}" = "1" ]; then
-              {{.WRAP}} {{._RUFF}} format {{.RUFF_OPTS}} {{._RUFF_ARGS}}
-              {{.WRAP}} {{._RUFF}} check --fix {{.RUFF_OPTS}} {{._RUFF_ARGS}}
+              {{._WRAP}} {{._RUFF}} format {{.RUFF_OPTS}} {{._RUFF_ARGS}}
+              {{._WRAP}} {{._RUFF}} check --fix {{.RUFF_OPTS}} {{._RUFF_ARGS}}
             else
-              {{.WRAP}} {{._RUFF}} format {{.RUFF_OPTS}} --check {{._RUFF_ARGS}}
-              {{.WRAP}} {{._RUFF}} check {{.RUFF_OPTS}} {{.RUFF_ARGS}}
+              {{._WRAP}} {{._RUFF}} format {{.RUFF_OPTS}} --check {{._RUFF_ARGS}}
+              {{._WRAP}} {{._RUFF}} check {{.RUFF_OPTS}} {{.RUFF_ARGS}}
             fi
           fi
-          {{.ECHO_OK}} "=> OK: ruff linting completed"
+          {{._ECHO_OK}} "=> OK: ruff linting completed"
 
   lint-mypy:
     deps: ["sync"]
@@ -209,11 +212,11 @@ tasks:
     silent: true
     cmds:
       - |
-          {{.ECHO_RUNNING}} "=> Linting with mypy..."
+          {{._ECHO_RUNNING}} "=> Linting with mypy..."
           if [ "{{.LINT_MYPY}}" = "1" ]; then
-            {{.WRAP}} {{._MYPY}} {{.MYPY_OPTS}} {{._MYPY_ARGS}}
+            {{._WRAP}} {{._MYPY}} {{.MYPY_OPTS}} {{._MYPY_ARGS}}
           fi
-          {{.ECHO_OK}} "=> OK: mypy linting completed"
+          {{._ECHO_OK}} "=> OK: mypy linting completed"
   lint:
     internal: true
     silent: true
@@ -228,15 +231,15 @@ tasks:
     silent: true
     cmds:
       - |
-          {{.ECHO_RUNNING}} "=> Running tests..."
+          {{._ECHO_RUNNING}} "=> Running tests..."
           if [ "{{.TEST_PYTEST}}" = "1" ]; then
             if [ "{{.COVERAGE}}" = "1" ]; then
-              {{.WRAP}} {{._PYTEST}} {{.PYTEST_OPTS}} {{.PYTEST_COVERAGE_OPTS}} {{._PYTEST_ARGS}}
+              {{._WRAP}} {{._PYTEST}} {{.PYTEST_OPTS}} {{.PYTEST_COVERAGE_OPTS}} {{._PYTEST_ARGS}}
             else
-              {{.WRAP}} {{._PYTEST}} {{.PYTEST_OPTS}} {{._PYTEST_ARGS}}
+              {{._WRAP}} {{._PYTEST}} {{.PYTEST_OPTS}} {{._PYTEST_ARGS}}
             fi
           fi
-          {{.ECHO_OK}} "=> OK: tests completed"
+          {{._ECHO_OK}} "=> OK: tests completed"
 
   build:
     internal: true
@@ -244,9 +247,9 @@ tasks:
     deps:
       - sync
     cmds:
-      - "{{.ECHO_RUNNING}} '=> Building package...'"
-      - "{{.WRAP}} {{.UV}} build"
-      - "{{.ECHO_OK}} '=> OK: package built'"
+      - "{{._ECHO_RUNNING}} '=> Building package...'"
+      - "{{._WRAP}} {{.UV}} build"
+      - "{{._ECHO_OK}} '=> OK: package built'"
 
   publish:
     internal: true
@@ -254,9 +257,9 @@ tasks:
     deps:
       - build
     cmds:
-      - "{{.ECHO_RUNNING}} '=> Publishing package...'"
+      - "{{._ECHO_RUNNING}} '=> Publishing package...'"
       - "{{.UV}} publish"
-      - "{{.ECHO_OK}} '=> OK: package published'"
+      - "{{._ECHO_OK}} '=> OK: package published'"
 
   clean:
     internal: true
@@ -294,3 +297,15 @@ tasks:
       - 'echo "PYTEST_OPTS: {{.PYTEST_OPTS}}"'
       - 'echo "PYTEST_COVERAGE_OPTS: {{.PYTEST_COVERAGE_OPTS}}"'
       - 'echo "PYTEST_ARGS: {{.PYTEST_ARGS}}"'
+
+  debug2:
+    silent: true
+    cmds:
+      - "echo TASKFILE_DIR: {{.TASKFILE_DIR}}"
+      - "echo ROOT_DIR: {{.ROOT_DIR}}"
+      - "echo {{._ECHO_OK}}"
+
+  check_*_or_die:
+    silent: true
+    cmds:
+      - "{{index .MATCH 0}} --help >/dev/null 2>&1 || {{.ECHO_FAILED}} 'ERROR: {{ index .MATCH 0 }} is not installed'"

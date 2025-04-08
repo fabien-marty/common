@@ -1,38 +1,64 @@
 version: '3'
 
+vars:
+  UTILS_DIR: "../taskfiles/utils"
+  ECHO_OK: "{{.UTILS_DIR}}/echo_ok"
+  WRAP: "{{.UTILS_DIR}}/wrap"
+
 includes:
-  core: ../taskfiles/Taskfile-core.yml
-  uv: ../taskfiles/Taskfile-python-uv.yml
-  node: ../taskfiles/Taskfile-node-npm.yml
+  uv: 
+    taskfile: ../taskfiles/Taskfile-python-uv.yml
+  node: 
+    taskfile: ../taskfiles/Taskfile-node-npm.yml
+  misc:
+    taskfile: ../taskfiles/Taskfile-misc.yml
+
 
 tasks:
 
   lint:
     desc: "Lint code and labels"
-    deps: [uv:lint]
+    silent: true
     cmds:
+      - task: uv:lint
       - python lint.py --dont-fix
+      - '{{.ECHO_OK}} "Linting OK"'
 
   install:
-    desc: "FIXME"
+    desc: "Install all dependencies (including dev ones)"
     cmds:
-      - task: node:install
-      - task: uv:install
+      - task: node:sync
+      - task: uv:sync
+      - '{{.ECHO_OK}} "Dependencies installed"'
 
   apply:
     deps: [node:sync]
     desc: "Apply labels to the current repository"
+    silent: true
     cmds:
       - if [ "${REPO:-}" = "" ]; then {{.ECHO_FAIL}} "REPO is not set"; exit 1; fi
       - if [ "${ACCESS_TOKEN:-}" = "" ]; then {{.ECHO_FAIL}} "ACCESS_TOKEN is not set"; exit 1; fi
-      - "{{.FNM}} exec github-label-sync --access-token ${ACCESS_TOKEN} --allow-added-labels --labels labels.json ${REPO}"
+      - "{{.ADD_NODE_MODULES_BIN_TO_PATH}} && {{.WRAP}} {{.FNM}} exec github-label-sync --access-token ${ACCESS_TOKEN} --allow-added-labels --labels labels.json ${REPO}"
+      - '{{.ECHO_OK}} "Labels applied"'
 
   clean:
+    desc: "Clean the repository"
     cmds:
       - task: uv:clean
       - task: node:clean
+      - '{{.ECHO_OK}} "Repository cleaned"'
 
   mrproper:
+    desc: "Clean the repository and remove all dependencies"
+    silent: true
     cmds:
       - task: uv:mrproper
       - task: node:mrproper
+      - '{{.ECHO_OK}} "Repository cleaned"'
+
+  no-dirty:
+    desc: "Check that the repository is clean"
+    silent: true
+    cmds:
+      - task: misc:no-dirty
+      - '{{.ECHO_OK}} "Repository is clean"'

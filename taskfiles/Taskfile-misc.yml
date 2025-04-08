@@ -1,17 +1,28 @@
 version: '3'
 
+vars:
+  _UTILS_DIR: "{{.TASKFILE_DIR}}/utils"
+  _ECHO_OK: "{{._UTILS_DIR}}/echo_ok"
+  _ECHO_FAILED: "{{._UTILS_DIR}}/echo_failed"
+
 tasks:
 
   no-dirty:
     desc: "Check that the repository is clean"
+    internal: true
     silent: true
     cmds: 
-      - {{.CHECK_GIT_OR_DIE}}
+      - task: check_git_or_die
       - |
           if test -n "$(git status --porcelain)"; then
             echo "***** git status *****"
             git status
             echo "***** git diff *****"
             git diff
-            {{.ECHO_FAILED}} "ERROR: the repository is dirty"
+            {{.TASKFILE_DIR/utils/echo_failed}} "ERROR: the repository is dirty"
           fi
+
+  check_*_or_die:
+    silent: true
+    cmds:
+      - "{{index .MATCH 0}} --help >/dev/null 2>&1 || {{.ECHO_FAILED}} 'ERROR: {{ index .MATCH 0 }} is not installed'"

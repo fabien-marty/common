@@ -1,8 +1,5 @@
 version: '3'
 
-includes:
-  core: "Taskfile-core.yml"
-
 vars:
 
   _FNM_DIR: "{{.ROOT_DIR}}/.task/fnm" 
@@ -30,6 +27,9 @@ vars:
   #  and this variable will be set to this temporary path) 
   NODE: "{{.NODE|default ._DEFAULT_NODE}}"
 
+  NODE_MODULES_BIN: "{{.ROOT_DIR}}/node_modules/.bin"
+  ADD_NODE_MODULES_BIN_TO_PATH: "export PATH={{.NODE_MODULES_BIN}}:$PATH"
+
   _EXTERNAL_NODE:
     sh: |
           if [ "{{.NODE}}" = "{{._DEFAULT_NODE}}" ]; then
@@ -49,6 +49,12 @@ vars:
             echo `dirname {{.NODE}}`/npm
           fi
 
+  _UTILS_DIR: "{{.TASKFILE_DIR}}/utils"
+  _ECHO_OK: "{{._UTILS_DIR}}/echo_ok"
+  _ECHO_RUNNING: "{{._UTILS_DIR}}/echo_running"
+  _ECHO_FAILED: "{{._UTILS_DIR}}/echo_failed"
+  _WRAP: "{{._UTILS_DIR}}/wrap"
+
 tasks:
 
   install-fnm:
@@ -67,13 +73,13 @@ tasks:
           fi
           exit 1
     cmds:
-      - "{{.CHECK_CURL_OR_DIE}}"
-      - "{{.ECHO_RUNNING}} '=> Installing fnm...'"
+      - task: check_curl_or_die
+      - "{{._ECHO_RUNNING}} '=> Installing fnm...'"
       - rm -Rf "{{._FNM_DIR}}"
       - mkdir -p "{{._FNM_DIR}}"
-      - '{{.WRAP}} curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell --install-dir "{{._FNM_DIR}}"'
-      - '{{.FNM}} --version >/dev/null 2>&1 || {{.ECHO_FAILED}} "=> ERROR: fnm not installed"'
-      - "{{.ECHO_OK}} '=> OK: fnm installed'"
+      - '{{._WRAP}} curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell --install-dir "{{._FNM_DIR}}"'
+      - '{{.FNM}} --version >/dev/null 2>&1 || {{._ECHO_FAILED}} "=> ERROR: fnm not installed"'
+      - "{{._ECHO_OK}} '=> OK: fnm installed'"
 
   install-node:
     internal: true
@@ -82,18 +88,18 @@ tasks:
     status:
       - "{{.NODE}} --version >/dev/null 2>&1"
     cmds:
-      - "{{.ECHO_RUNNING}} '=> Installing node...'"
-      - "{{.WRAP}} {{.FNM}} install"
-      - "{{.ECHO_OK}} '=> OK: node installed'"
+      - "{{._ECHO_RUNNING}} '=> Installing node...'"
+      - "{{._WRAP}} {{.FNM}} install"
+      - "{{._ECHO_OK}} '=> OK: node installed'"
 
   lock:
     deps: [install-node]
     silent: true
     desc: "(advanced) Lock node/npm dependencies"
     cmds:
-      - "{{.ECHO_RUNNING}} '=> Locking node dependencies...'"
-      - "{{.WRAP}} {{.NPM}} install --package-lock-only"
-      - "{{.ECHO_OK}} '=> OK: node dependencies locked'"
+      - "{{._ECHO_RUNNING}} '=> Locking node dependencies...'"
+      - "{{._WRAP}} {{.NPM}} install --package-lock-only"
+      - "{{._ECHO_OK}} '=> OK: node dependencies locked'"
     sources:
       - package.json
     generates:
@@ -104,10 +110,10 @@ tasks:
     silent: true
     deps: [lock]
     cmds:
-      - "{{.ECHO_RUNNING}} '=> Syncing node dependencies...'"
-      - "{{.WRAP}} {{.NPM}} ci"
+      - "{{._ECHO_RUNNING}} '=> Syncing node dependencies...'"
+      - "{{._WRAP}} {{.NPM}} ci"
       - cat package-lock.json |md5sum > node_modules/.hash
-      - "{{.ECHO_OK}} '=> OK: node dependencies synced'"
+      - "{{._ECHO_OK}} '=> OK: node dependencies synced'"
     sources:
       - package-lock.json
     generates:
@@ -155,3 +161,8 @@ tasks:
             rm -Rf {{._FNM_DIR}}
           fi
       - rm -f .fnm.env
+
+  check_*_or_die:
+    silent: true
+    cmds:
+      - "{{index .MATCH 0}} --help >/dev/null 2>&1 || {{.ECHO_FAILED}} 'ERROR: {{ index .MATCH 0 }} is not installed'"
