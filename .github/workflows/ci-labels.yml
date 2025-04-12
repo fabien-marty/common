@@ -30,7 +30,8 @@ jobs:
   mergify-ci-status:
     runs-on: ubuntu-24.04
     needs: ["ci-labels"]
-    if: ${{ always() }}
+    # See https://stackoverflow.com/questions/69354003/github-action-job-fire-when-previous-job-skipped
+    # when none of the needed jobs fail or are cancelled (skipped or successful jobs are ok).
+    if: ${{ always() && !failure() && !cancelled() }} 
     steps:
-      - name: OK
-        run: echo "OK"
+      - run: echo "OK"
