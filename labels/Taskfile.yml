@@ -12,7 +12,7 @@ includes:
     taskfile: ../taskfiles/Taskfile-node-npm.yml
   misc:
     taskfile: ../taskfiles/Taskfile-misc.yml
-
+    flatten: true
 
 tasks:
 
@@ -55,10 +55,3 @@ tasks:
       - task: uv:mrproper
       - task: node:mrproper
       - '{{.ECHO_OK}} "Repository cleaned"'
-
-  no-dirty:
-    desc: "Check that the repository is clean"
-    silent: true
-    cmds:
-      - task: misc:no-dirty
-      - '{{.ECHO_OK}} "Repository is clean"'
