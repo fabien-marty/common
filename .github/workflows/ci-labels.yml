@@ -1,0 +1,36 @@
+name: ci-labels
+
+on:
+  pull_request:
+    paths:
+      - 'labels/**'
+      - '.github/workflows/ci-labels.yml'
+
+jobs:
+
+  ci-labels:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Lint labels
+        run: |
+          cd labels
+          task lint
+      - name: Check that the repository is clean
+        run: |
+          cd labels
+          task no-dirty
+
+  mergify-ci-status:
+    runs-on: ubuntu-24.04
+    needs: ["ci-labels"]
+    if: ${{ always() }}
+    steps:
+      - name: OK
+        run: echo "OK"
