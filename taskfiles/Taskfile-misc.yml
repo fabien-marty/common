@@ -40,5 +40,6 @@ tasks:
           mkdir -p "{{.ROOT_DIR}}/.task"
           rm -Rf "{{.ROOT_DIR}}/.task/taskfiles"
           cp -Rf "common/taskfiles" "{{.ROOT_DIR}}/.task/"
+          cd
           rm -Rf "$TMPDIR"
           {{._ECHO_OK}} "Updated from common"
