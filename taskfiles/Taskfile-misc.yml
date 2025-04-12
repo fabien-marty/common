@@ -19,10 +19,11 @@ tasks:
             git status
             echo "***** git diff *****"
             git diff
-            {{.TASKFILE_DIR/utils/echo_failed}} "ERROR: the repository is dirty"
+            {{._ECHO_FAILED}} "ERROR: the repository is dirty"
+            exit 1
           fi
 
   check_*_or_die:
     silent: true
     cmds:
-      - "{{index .MATCH 0}} --help >/dev/null 2>&1 || {{.ECHO_FAILED}} 'ERROR: {{ index .MATCH 0 }} is not installed'"
+      - "{{index .MATCH 0}} --help >/dev/null 2>&1 || {{._ECHO_FAILED}} 'ERROR: {{ index .MATCH 0 }} is not installed'"
