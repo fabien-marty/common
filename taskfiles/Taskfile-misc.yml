@@ -9,7 +9,6 @@ tasks:
 
   no-dirty:
     desc: "Check that the repository is clean"
-    internal: true
     silent: true
     cmds: 
       - task: check_git_or_die
