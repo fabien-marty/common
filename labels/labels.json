@@ -5,7 +5,9 @@
     "name": "Type: Security"
   },
   {
-    "aliases": ["bug"],
+    "aliases": [
+      "bug"
+    ],
     "color": "ee9b00",
     "name": "Type: Fixed"
   },
@@ -15,7 +17,9 @@
     "name": "Type: Removed"
   },
   {
-    "aliases": ["enhancement"],
+    "aliases": [
+      "enhancement"
+    ],
     "color": "e9d8a6",
     "name": "Type: Changed"
   },
