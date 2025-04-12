@@ -19,7 +19,11 @@ queue_rules:
     merge_method: squash
     commit_message_template: '{{ title }}'
     queue_conditions:
-      - check-success = mergify-ci-status
+      - or:
+          - "check-success = ci-labels"
+          - and:
+              - "-files~=^labels/.*$"
+              - "-files=^.github/workflows/ci-labels.yml"
       - "-draft"
       - "-closed"
       - "-conflict"
