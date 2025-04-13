@@ -190,8 +190,8 @@ tasks:
     silent: true
     cmds:
       - |
-          {{._ECHO_RUNNING}} "=> Linting with ruff..."
           if [ "{{.LINT_RUFF}}" = "1" ]; then
+            {{._ECHO_RUNNING}} "=> Linting with ruff..."
             if [ "{{.FIX}}" = "1" ]; then
               {{._WRAP}} {{._RUFF}} format {{.RUFF_OPTS}} {{._RUFF_ARGS}}
               {{._WRAP}} {{._RUFF}} check --fix {{.RUFF_OPTS}} {{._RUFF_ARGS}}
@@ -199,8 +199,8 @@ tasks:
               {{._WRAP}} {{._RUFF}} format {{.RUFF_OPTS}} --check {{._RUFF_ARGS}}
               {{._WRAP}} {{._RUFF}} check {{.RUFF_OPTS}} {{.RUFF_ARGS}}
             fi
+            {{._ECHO_OK}} "=> OK: ruff linting completed"
           fi
-          {{._ECHO_OK}} "=> OK: ruff linting completed"
 
   lint-mypy:
     deps: ["sync"]
@@ -208,11 +208,11 @@ tasks:
     silent: true
     cmds:
       - |
-          {{._ECHO_RUNNING}} "=> Linting with mypy..."
           if [ "{{.LINT_MYPY}}" = "1" ]; then
+            {{._ECHO_RUNNING}} "=> Linting with mypy..."
             {{._WRAP}} {{._MYPY}} {{.MYPY_OPTS}} {{._MYPY_ARGS}}
+            {{._ECHO_OK}} "=> OK: mypy linting completed"
           fi
-          {{._ECHO_OK}} "=> OK: mypy linting completed"
   lint:
     internal: true
     silent: true
@@ -227,15 +227,15 @@ tasks:
     silent: true
     cmds:
       - |
-          {{._ECHO_RUNNING}} "=> Running tests..."
           if [ "{{.TEST_PYTEST}}" = "1" ]; then
+            {{._ECHO_RUNNING}} "=> Running tests..."
             if [ "{{.COVERAGE}}" = "1" ]; then
               {{._WRAP}} {{._PYTEST}} {{.PYTEST_OPTS}} {{.PYTEST_COVERAGE_OPTS}} {{._PYTEST_ARGS}}
             else
               {{._WRAP}} {{._PYTEST}} {{.PYTEST_OPTS}} {{._PYTEST_ARGS}}
             fi
+            {{._ECHO_OK}} "=> OK: tests completed"
           fi
-          {{._ECHO_OK}} "=> OK: tests completed"
 
   build:
     internal: true
