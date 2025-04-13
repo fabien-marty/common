@@ -2,7 +2,7 @@ version: '3'
 
 vars:
 
-  _FNM_DIR: "{{.ROOT_DIR}}/.task/fnm" 
+  _FNM_DIR: "{{.ROOT_DIR}}/.tmp/taskfile-node-npm/fnm" 
   _DEFAULT_FNM: "{{._FNM_DIR}}/fnm"
 
   # Contains, the full absolute path to the "fnm" binary
@@ -100,24 +100,24 @@ tasks:
       - "{{._ECHO_RUNNING}} '=> Locking node dependencies...'"
       - "{{._WRAP}} {{.NPM}} install --package-lock-only"
       - "{{._ECHO_OK}} '=> OK: node dependencies locked'"
-    sources:
-      - package.json
-    generates:
-      - package-lock.json
 
   sync:
     desc: "(advanced) Sync node/npm dependencies"
     silent: true
-    deps: [lock]
+    deps: [install-node]
+    status:
+      - |
+          if ! [ -f "node_modules/.hash" ]; then
+            exit 1
+          fi
+          if [ "$(md5sum package-lock.json)" != "$(cat node_modules/.hash)" ]; then
+            exit 1
+          fi
     cmds:
       - "{{._ECHO_RUNNING}} '=> Syncing node dependencies...'"
-      - "{{._WRAP}} {{.NPM}} ci"
+      - "{{._WRAP}} {{.NPM}} install"
       - cat package-lock.json |md5sum > node_modules/.hash
       - "{{._ECHO_OK}} '=> OK: node dependencies synced'"
-    sources:
-      - package-lock.json
-    generates:
-      - node_modules/.hash
 
   debug:
     desc: "(advanced) Debug the node/npm environment"
@@ -152,15 +152,12 @@ tasks:
     cmds:
       - |
           if [ "{{._EXTERNAL_FNM}}" = "0" ]; then
-            {{.FNM}} env > .fnm.env 2>/dev/null || exit 0
-            source .fnm.env
-            rm -Rf "${FNM_DIR}"
-          fi
-      - |
-          if [ "{{._EXTERNAL_FNM}}" = "0" ]; then
             rm -Rf {{._FNM_DIR}}
+            export DIR1=$(dirname "{{._FNM_DIR}}")
+            export DIR2=$(dirname "${DIR1}")
+            rmdir "${DIR1}" >/dev/null 2>&1 || true # only if empty
+            rmdir "${DIR2}" >/dev/null 2>&1 || true # only if empty
           fi
-      - rm -f .fnm.env
 
   check_*_or_die:
     silent: true

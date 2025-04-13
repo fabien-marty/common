@@ -19,7 +19,7 @@ vars:
 
   ##### UV #####
 
-  _UV_DIR: "{{.ROOT_DIR}}/.task/uv"
+  _UV_DIR: "{{.ROOT_DIR}}/.tmp/taskfile-python-uv/uv"
   _DEFAULT_UV: "{{._UV_DIR}}/uv"
 
   # Contains, the full absolute path to the "uv" binary
@@ -46,7 +46,7 @@ vars:
   _DEFAULT_UV_OPTS: ""
   UV_OPTS: "{{.UV_OPTS | default ._DEFAULT_UV_OPTS}}"
 
-  _DEFAULT_UV_SYNC_OPTS: "--frozen"
+  _DEFAULT_UV_SYNC_OPTS: ""
   UV_SYNC_OPTS: "{{.UV_SYNC_OPTS | default ._DEFAULT_UV_SYNC_OPTS}}"
 
 
@@ -157,10 +157,6 @@ tasks:
       - '{{._ECHO_RUNNING}} "=> Locking uv environment..."'
       - "{{._WRAP}} {{.UV}} lock"
       - '{{._ECHO_OK}} "=> OK: uv environment locked"'
-    sources:
-      - "{{.ROOT_DIR}}/pyproject.toml"
-    generates:
-      - "{{.ROOT_DIR}}/uv.lock"
 
   sync:
     desc: "(advanced) Sync the python/uv environment"
@@ -180,7 +176,7 @@ tasks:
             exit 1
           fi
     deps: 
-      - lock
+      - install
     cmds:
       - '{{._ECHO_RUNNING}} "=> Syncing uv environment..."'
       - "{{._WRAP}} {{.UV}} sync {{.UV_SYNC_OPTS}}"
@@ -276,6 +272,10 @@ tasks:
       - |
           if [ "{{._EXTERNAL_UV}}" = "0" ]; then
             rm -Rf {{._UV_DIR}}
+            export DIR1=$(dirname "{{._UV_DIR}}")
+            export DIR2=$(dirname "${DIR1}")
+            rmdir "${DIR1}" >/dev/null 2>&1 || true # only if empty
+            rmdir "${DIR2}" >/dev/null 2>&1 || true # only if empty
           fi
 
   debug:
@@ -297,13 +297,10 @@ tasks:
       - 'echo "PYTEST_OPTS: {{.PYTEST_OPTS}}"'
       - 'echo "PYTEST_COVERAGE_OPTS: {{.PYTEST_COVERAGE_OPTS}}"'
       - 'echo "PYTEST_ARGS: {{.PYTEST_ARGS}}"'
-
-  debug2:
-    silent: true
-    cmds:
-      - "echo TASKFILE_DIR: {{.TASKFILE_DIR}}"
-      - "echo ROOT_DIR: {{.ROOT_DIR}}"
-      - "echo {{._ECHO_OK}}"
+      - 'echo "UV_PYTHON: ${UV_PYTHON}"'
+      - 'echo "UV_MANAGED_PYTHON: ${UV_MANAGED_PYTHON}"'
+      - 'echo "UV_NO_MANAGED_PYTHON: ${UV_NO_MANAGED_PYTHON}"'
+      - 'echo "UV_PYTHON_DOWNLOADS: ${UV_PYTHON_DOWNLOADS}"'
 
   check_*_or_die:
     silent: true

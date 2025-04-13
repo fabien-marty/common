@@ -49,7 +49,7 @@ tasks:
       - '{{.ECHO_OK}} "Repository cleaned"'
 
   mrproper:
-    desc: "Clean the repository and remove all dependencies"
+    desc: "Clean the repository (including tools)"
     silent: true
     cmds:
       - task: uv:mrproper
