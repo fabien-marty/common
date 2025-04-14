@@ -40,7 +40,7 @@ tasks:
           mkdir -p "{{.ROOT_DIR}}/.task/taskfiles"
           rm -Rf "{{.ROOT_DIR}}/.task/taskfiles/utils"
           cp -Rf "common/taskfiles/utils" "{{.ROOT_DIR}}/.task/taskfiles/"
-          for file in "common/taskfiles/Taskfile-*.yml"; do
+          for file in common/taskfiles/Taskfile-*.yml; do
             cp -f "$file" "{{.ROOT_DIR}}/.task/taskfiles/"
           done
           cd
