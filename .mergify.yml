@@ -24,6 +24,11 @@ queue_rules:
           - and:
               - "-files~=^labels/.*$"
               - "-files=^.github/workflows/ci-labels.yml"
+      - or:
+          - "check-success = ci-taskfiles"
+          - and:
+              - "-files~=^taskfiles/.*$"
+              - "-files=^.github/workflows/ci-taskfiles.yml"
       - "-draft"
       - "-closed"
       - "-conflict"
