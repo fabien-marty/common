@@ -26,3 +26,8 @@ jobs:
         run: |
           cd labels
           task no-dirty
+      - name: Clean the repository
+        run: |
+          cd labels
+          task mrproper
+          task no-dirty
