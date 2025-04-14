@@ -1,0 +1,40 @@
+version: '3'
+
+vars:
+  UTILS_DIR: "utils"
+  ECHO_OK: "{{.UTILS_DIR}}/echo_ok"
+
+includes:
+  uv: Taskfile-python-uv.yml
+
+tasks:
+
+  install:
+    desc: "Install all dependencies (including dev ones)"
+    cmds:
+      - task: uv:sync
+      - '{{.ECHO_OK}} "Dependencies installed"'
+
+  lint:
+    desc: "Lint code"
+    silent: true
+    cmds:
+      - task: uv:lint
+      - '{{.ECHO_OK}} "Linting OK"'
+
+  clean:
+    desc: "Clean the repository"
+    cmds:
+      - task: uv:clean
+
+  mrproper:
+    desc: "Clean the repository (including tools)"
+    silent: true
+    cmds:
+      - task: uv:mrproper
+
+  no-dirty:
+    desc: "Check if the repository is dirty"
+    silent: true
+    cmds:
+      - task: uv:no-dirty
