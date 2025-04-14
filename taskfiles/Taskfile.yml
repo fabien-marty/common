@@ -6,6 +6,7 @@ vars:
 
 includes:
   uv: Taskfile-python-uv.yml
+  misc: Taskfile-misc.yml
 
 tasks:
 
@@ -37,4 +38,4 @@ tasks:
     desc: "Check if the repository is dirty"
     silent: true
     cmds:
-      - task: uv:no-dirty
+      - task: misc:no-dirty

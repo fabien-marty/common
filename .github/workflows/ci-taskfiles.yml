@@ -1,4 +1,4 @@
-name: ci-labels
+name: ci-taskfiles
 
 on:
   pull_request:
