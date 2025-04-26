@@ -1,0 +1,21 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "baseBranches": [
+        "main"
+    ],
+    "extends": [
+        "config:best-practices"
+    ],
+    "rebaseWhen": "conflicted",
+    "rangeStrategy": "update-lockfile",
+    "lockFileMaintenance": {
+        "enabled": false
+    },
+    "vulnerabilityAlerts": {
+	"labels": [
+	    "Type: Security"
+	],
+        "enabled": true
+    },
+    "osvVulnerabilityAlerts": true
+}
