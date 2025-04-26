@@ -6,7 +6,6 @@
     "extends": [
         "config:best-practices"
     ],
-    "ignorePaths": [],
     "labels": [
         "Type: Changed"
     ],

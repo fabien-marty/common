@@ -6,6 +6,10 @@
     "extends": [
         "config:best-practices"
     ],
+    "labels": [
+        "Type: Changed"
+    ],
+    "prConcurrentLimit": 10,
     "rebaseWhen": "conflicted",
     "rangeStrategy": "update-lockfile",
     "lockFileMaintenance": {
