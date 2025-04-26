@@ -20,4 +20,4 @@ jobs:
           RENOVATE_CONFIG_FILE: ".renovate-non-security.json"
           LOG_LEVEL: 'debug'
         with:
-          token: ${{ secrets.MERGIFY_SYNC_TOKEN }}
+          token: ${{ secrets.PAT }}
