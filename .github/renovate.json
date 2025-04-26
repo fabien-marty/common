@@ -3,6 +3,8 @@
     "baseBranches": [
         "main"
     ],
+    "dependencyDashboard": false,
+    "dependencyDashboardApproval": false,
     "extends": [
         "config:best-practices"
     ],
@@ -11,14 +13,17 @@
     ],
     "prConcurrentLimit": 10,
     "rebaseWhen": "conflicted",
-    "rangeStrategy": "in-range-only",
+    "rangeStrategy": "update-lockfile",
     "lockFileMaintenance": {
         "enabled": true
     },
     "vulnerabilityAlerts": {
-        "enabled": false
+	"labels": [
+	    "Type: Security"
+	],
+        "enabled": true
     },
-    "osvVulnerabilityAlerts": false,
+    "osvVulnerabilityAlerts": true,
     "packageRules": [
         {
             "description": "Put every devDependency bump into one PR",
