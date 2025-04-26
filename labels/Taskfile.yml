@@ -38,7 +38,7 @@ tasks:
     cmds:
       - if [ "${REPO:-}" = "" ]; then {{.ECHO_FAIL}} "REPO is not set"; exit 1; fi
       - if [ "${ACCESS_TOKEN:-}" = "" ]; then {{.ECHO_FAIL}} "ACCESS_TOKEN is not set"; exit 1; fi
-      - "{{.ADD_NODE_MODULES_BIN_TO_PATH}} && {{.WRAP}} {{.FNM}} exec github-label-sync --access-token ${ACCESS_TOKEN} --allow-added-labels --labels labels.json ${REPO}"
+      - "{{.ADD_NODE_MODULES_BIN_TO_PATH}} && {{.WRAP}} {{.FNM}} exec github-label-sync --access-token ${ACCESS_TOKEN} --labels labels.json ${REPO}"
       - '{{.ECHO_OK}} "Labels applied"'
 
   clean:
