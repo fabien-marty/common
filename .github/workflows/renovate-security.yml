@@ -1,4 +1,4 @@
-name: renovate-non-security
+name: renovate-security
 
 on:
   schedule:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  renovate:
+  renovate-security:
     runs-on: ubuntu-22.04
     steps:
       - name: Check out repository code
