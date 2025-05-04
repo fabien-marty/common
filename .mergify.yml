@@ -32,4 +32,4 @@ queue_rules:
       - "-draft"
       - "-closed"
       - "-conflict"
-
+      - "label~=^Type:.*"
