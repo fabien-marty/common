@@ -34,13 +34,5 @@ queue_rules:
       - "-conflict"
       - "label~=^Type:.*"
       - or:
-          - and:
-              - "-author=fabien-marty"
-              - "#approved-reviews-by >= 1"
-          - and:
-              - "author=fabien-marty"
-              - "-label=Tool: Renovate"
-          - and:
-              - "author=fabien-marty"
-              - "label=Tool: Renovate"
-              - "commented-reviews-by=fabien-marty"
+          - "author=fabien-marty"
+          - "#approved-reviews-by >= 1"
