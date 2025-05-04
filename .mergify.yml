@@ -33,3 +33,6 @@ queue_rules:
       - "-closed"
       - "-conflict"
       - "label~=^Type:.*"
+      - or:
+          - "author=fabien-marty"
+          - "#approved-reviews-by >= 1"
