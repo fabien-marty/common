@@ -32,5 +32,10 @@
     "aliases": [],
     "color": "001219",
     "name": "Type: Hidden"
+  },
+  {
+    "aliases": [],
+    "color": "001219",
+    "name": "Tool: Renovate"
   }
 ]

@@ -1,0 +1,80 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "baseBranches": [
+        "main"
+    ],
+    "ignorePaths": [
+    ],
+    "dependencyDashboard": false,
+    "dependencyDashboardApproval": false,
+    "extends": [
+        "config:best-practices"
+    ],
+    "labels": [
+        "Tool: Renovate",
+        "Type: Changed"
+    ],
+    "prConcurrentLimit": 10,
+    "prHourlyLimit": 10,
+    "rangeStrategy": "update-lockfile",
+    "lockFileMaintenance": {
+        "enabled": true,
+        // the first day of each month (between 00:00 and 03:00 UTC)
+        "schedule": "* 0-3 1 * *"
+    },
+    "vulnerabilityAlerts": {
+        "labels": [
+            "Tool: Renovate",
+            "Type: Security"
+        ],
+        "enabled": true
+    },
+    // the first day of each month (between 00:00 and 03:00 UTC)
+    "schedule": "* 0-3 1 * *",
+    "osvVulnerabilityAlerts": true,
+    "packageRules": [
+        {
+            "matchManagers": [
+                "poetry"
+            ],
+            "matchDepTypes": [
+                "dev-dependencies",
+                "dev"
+            ],
+            "groupName": "python-dev-deps"
+        },
+        {
+            "matchManagers": [
+                "pipenv"
+            ],
+            "matchDepTypes": [
+                "dev-packages"
+            ],
+            "groupName": "python-dev-deps"
+        },
+        {
+            "matchManagers": [
+                "pep621"
+            ],
+            "matchDepTypes": [
+                "tool.pdm.dev-dependencies",
+                "tool.uv.dev-dependencies",
+                "tool.hatch.envs.dev"
+            ],
+            "groupName": "python-dev-deps"
+        },
+        {
+            "groupName": "patch-dependencies",
+            "matchCurrentVersion": "!/^0/",
+            "matchUpdateTypes": [
+                "patch"
+            ]
+        },
+        {
+            "matchDepNames": [
+                "python"
+            ],
+            "enabled": false
+        },
+    ]
+}
